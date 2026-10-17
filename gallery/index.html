@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Family Gallery</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#1f2a4d">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
+<link rel="apple-touch-icon" href="gallery-apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Family Gallery">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #fbf6f8; --card: #ffffff; --ink: #1f2a4d; --muted: #6d7491; --line: #f0e4ea;
+    --soft: #fdf0f5; --mid: #eeb3c9; --deep: #c9668c; --heart: #e0457b; --ok: #2f8a5f; --warn: #b7791f;
+    --hero-grad: radial-gradient(120% 80% at 50% 0%, #fbe4ee 0%, #f3c4d6 45%, #b98aa0 100%);
+    --radius: 20px; --shadow: 0 8px 26px rgba(31,42,77,.07), 0 2px 6px rgba(31,42,77,.04);
+  }
+  html[data-theme="sky"] { --bg:#f4f8fc; --ink:#1d2c4a; --muted:#66748f; --line:#dfe8f3; --soft:#edf4fb; --mid:#a9c6e6; --deep:#4f80b8; --hero-grad: radial-gradient(120% 80% at 50% 0%, #e6f0fa 0%, #bcd4ee 45%, #7f9dbf 100%); }
+  html[data-theme="ivory"] { --bg:#faf7f1; --ink:#2d2620; --muted:#7a6f63; --line:#eee5d6; --soft:#f8f1e4; --mid:#dcc595; --deep:#a8823a; --hero-grad: radial-gradient(120% 80% at 50% 0%, #fbf3e3 0%, #e9d6ae 45%, #a68c63 100%); }
+  html[data-theme="christmas"] { --bg:#f6f3ec; --ink:#1b2b24; --muted:#63706a; --line:#e6e0d2; --soft:#f7efe6; --mid:#d9a7a0; --deep:#b3262e; --hero-grad: radial-gradient(120% 80% at 50% 0%, #3f7a5c 0%, #1f4d3a 50%, #12291f 100%); }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--ink); font-family: "Nunito Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 16px; line-height: 1.45; -webkit-font-smoothing: antialiased; min-height: 100vh; }
+  button { font: inherit; color: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .serif { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 600; }
+  /* view-only: discourage saving */
+  img { -webkit-user-drag: none; user-select: none; -webkit-touch-callout: none; }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 14px; padding: 12px 16px; font-weight: 800; font-size: 15px; background: var(--soft); color: var(--ink); }
+  .btn.primary { background: var(--deep); color: #fff; }
+  .btn.block { width: 100%; min-height: 54px; font-size: 17px; margin-top: 16px; }
+  .btn:disabled { opacity: .55; }
+  .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); }
+
+  /* Login */
+  .login { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; background: var(--hero-grad); background-size: cover; background-position: center; position: relative; }
+  .login::before { content: ""; position: absolute; inset: 0; background: rgba(20,16,24,.35); }
+  .login .card { position: relative; width: 100%; max-width: 380px; text-align: center; padding: 30px 24px 26px; }
+  .login .kicker { font-size: 12px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--deep); margin: 0; }
+  .login h1 { font-size: 34px; line-height: 1.05; margin: 8px 0 6px; }
+  .login p { color: var(--muted); margin: 0 0 20px; }
+  .login input[type=password] { width: 100%; font: inherit; font-size: 17px; padding: 14px 16px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--soft); color: var(--ink); outline: none; text-align: center; }
+  .login .remember { display: flex; gap: 8px; align-items: center; justify-content: center; margin: 12px 0 0; color: var(--muted); font-size: 14px; }
+  .login .err { color: #c4425b; font-weight: 700; font-size: 14px; min-height: 20px; margin: 12px 0 0; }
+
+  /* Header */
+  .hero { position: relative; color: #fff; padding: calc(22px + env(safe-area-inset-top)) 18px 22px; background: var(--hero-grad); background-size: cover; background-position: center; }
+  .hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.1), rgba(0,0,0,.55)); }
+  .hero > * { position: relative; z-index: 1; }
+  .hero .row { display: flex; align-items: flex-start; gap: 10px; max-width: 900px; margin: 0 auto; }
+  .hero .kicker { font-size: 12px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; opacity: .9; margin: 40px 0 4px; }
+  .hero h1 { margin: 0; font-size: clamp(32px, 9vw, 48px); line-height: 1.02; }
+  .hero .date { margin: 6px 0 0; font-weight: 600; opacity: .95; }
+  .hero .grow { flex: 1; min-width: 0; }
+  .icon-btn { width: 42px; height: 42px; border-radius: 50%; border: 0; background: rgba(255,255,255,.18); color: #fff; display: grid; place-items: center; flex: none; backdrop-filter: blur(6px); }
+  .icon-btn.spin svg { animation: spin .9s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .wrap { max-width: 900px; margin: 0 auto; padding: 0 12px 100px; }
+  .intro { margin: 14px 4px 0; padding: 14px 16px; font-size: 14.5px; color: var(--muted); }
+  .intro b { color: var(--ink); }
+  .as-admin { margin: 12px 4px 0; padding: 10px 14px; border-radius: 12px; background: #fff6e0; color: #6b4a00; font-size: 13.5px; font-weight: 700; }
+
+  .tabs { position: sticky; top: 0; z-index: 5; display: flex; gap: 6px; padding: 12px 4px 10px; background: var(--bg); overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { border: 0; background: var(--card); box-shadow: var(--shadow); border-radius: 999px; padding: 9px 14px; font-weight: 800; font-size: 14px; color: var(--muted); white-space: nowrap; display: inline-flex; gap: 6px; align-items: center; }
+  .tab.on { background: var(--ink); color: #fff; }
+  .tab .count { font-weight: 800; opacity: .75; }
+  .tab .dot { min-width: 20px; height: 20px; border-radius: 10px; padding: 0 6px; background: var(--deep); color: #fff; font-size: 12px; display: inline-grid; place-items: center; }
+
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+  @media (min-width: 560px) { .grid { grid-template-columns: repeat(4, 1fr); gap: 6px; } }
+  @media (min-width: 860px) { .grid { grid-template-columns: repeat(5, 1fr); } }
+  .tile { position: relative; aspect-ratio: 1; border: 0; padding: 0; border-radius: 8px; overflow: hidden; background: var(--soft); display: block; width: 100%; }
+  .tile img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity .3s; pointer-events: none; }
+  .tile img.ready { opacity: 1; }
+  .tile .heart { position: absolute; right: 5px; bottom: 5px; width: 26px; height: 26px; border-radius: 50%; background: #fff; color: var(--heart); display: none; place-items: center; box-shadow: 0 1px 5px rgba(0,0,0,.25); }
+  .tile.picked .heart { display: grid; }
+  .tile .note-dot { position: absolute; left: 5px; bottom: 5px; padding: 2px 7px; border-radius: 9px; background: rgba(0,0,0,.55); color: #fff; font-size: 11px; font-weight: 800; display: none; }
+  .tile.has-note .note-dot { display: block; }
+  .empty { text-align: center; color: var(--muted); padding: 48px 20px; }
+  .empty .serif { font-size: 26px; color: var(--ink); display: block; margin-bottom: 6px; }
+
+  /* Edits to approve */
+  .edits { display: grid; gap: 14px; }
+  @media (min-width: 700px) { .edits { grid-template-columns: 1fr 1fr; } }
+  .edit { overflow: hidden; }
+  .edit .pic { position: relative; background: #0d0f14; aspect-ratio: 4 / 3; display: grid; place-items: center; }
+  .edit .pic img { max-width: 100%; max-height: 100%; object-fit: contain; pointer-events: none; }
+  .edit .pic .label { position: absolute; left: 10px; top: 10px; padding: 4px 9px; border-radius: 8px; background: rgba(0,0,0,.55); color: #fff; font-size: 12px; font-weight: 800; }
+  .edit .body { padding: 14px 16px 16px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 12.5px; font-weight: 800; }
+  .chip.waiting { background: var(--soft); color: var(--deep); }
+  .chip.approved { background: #e6f5ec; color: var(--ok); }
+  .chip.changes { background: #fff2dc; color: var(--warn); }
+  .edit .note { margin: 10px 0 0; font-size: 14px; color: var(--muted); }
+  .edit .actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .edit .actions .btn { flex: 1; min-width: 130px; }
+  .seg { display: inline-flex; background: rgba(255,255,255,.14); border-radius: 10px; padding: 3px; }
+  .seg button { border: 0; background: transparent; color: #fff; padding: 5px 10px; border-radius: 8px; font-weight: 800; font-size: 12.5px; }
+  .seg button.on { background: rgba(255,255,255,.9); color: #111; }
+  .edit .pic .seg { position: absolute; right: 10px; top: 10px; background: rgba(0,0,0,.45); }
+
+  /* Lightbox */
+  .lb { position: fixed; inset: 0; z-index: 50; background: #0d0f14; display: flex; flex-direction: column; color: #fff; }
+  .lb-top, .lb-bottom { display: flex; align-items: center; gap: 10px; padding: 10px 12px; }
+  .lb-top { padding-top: calc(10px + env(safe-area-inset-top)); }
+  .lb-top .meta { flex: 1; min-width: 0; font-size: 14px; }
+  .lb-top .meta b { display: block; font-size: 15px; }
+  .lb-top .meta span { color: #aab0c5; }
+  .lb-close { width: 44px; height: 44px; border-radius: 50%; border: 0; background: rgba(255,255,255,.1); color: #fff; display: grid; place-items: center; }
+  .lb-stage { flex: 1; position: relative; display: grid; place-items: center; overflow: hidden; touch-action: pan-y; }
+  .lb-stage img { max-width: 100%; max-height: 100%; object-fit: contain; pointer-events: none; transition: opacity .2s; }
+  .lb-shield { position: absolute; inset: 0; }
+  .lb-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 64px; border: 0; background: rgba(255,255,255,.08); color: #fff; border-radius: 12px; display: grid; place-items: center; z-index: 2; }
+  .lb-nav.prev { left: 8px; } .lb-nav.next { right: 8px; }
+  @media (hover: none) { .lb-nav { display: none; } }
+  .lb-bottom { flex-direction: column; align-items: stretch; padding-bottom: calc(14px + env(safe-area-inset-bottom)); }
+  .pick-btn { display: flex; align-items: center; justify-content: center; gap: 10px; border: 0; border-radius: 16px; min-height: 54px; font-size: 17px; font-weight: 800; background: rgba(255,255,255,.1); color: #fff; }
+  .pick-btn.on { background: var(--heart); }
+  .note-box { display: flex; gap: 8px; margin-top: 10px; }
+  .note-box textarea { flex: 1; font: inherit; font-size: 15px; border-radius: 12px; border: 0; padding: 10px 12px; min-height: 46px; max-height: 110px; resize: vertical; background: rgba(255,255,255,.1); color: #fff; outline: none; }
+  .note-box textarea::placeholder { color: #aab0c5; }
+  .note-box .btn { background: rgba(255,255,255,.16); color: #fff; }
+
+  .toast { position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%) translateY(20px); background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 12px; font-weight: 700; font-size: 14px; opacity: 0; pointer-events: none; transition: all .25s; z-index: 80; max-width: calc(100% - 32px); text-align: center; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .lb:not([hidden]) ~ .toast { bottom: auto; top: calc(70px + env(safe-area-inset-top)); }
+  .dialog-back { position: fixed; inset: 0; background: rgba(13,15,20,.5); z-index: 90; display: grid; place-items: center; padding: 16px; }
+  .dialog { background: #fff; border-radius: 18px; padding: 20px; max-width: 380px; width: 100%; }
+  .dialog h3 { margin: 0 0 6px; font-size: 18px; }
+  .dialog p { margin: 0 0 12px; color: var(--muted); font-size: 14.5px; }
+  .dialog textarea { width: 100%; font: inherit; font-size: 15px; min-height: 90px; padding: 10px 12px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--soft); outline: none; }
+  .dialog .row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<section class="login" id="loginView" hidden>
+  <form class="card" id="loginForm" autocomplete="on">
+    <p class="kicker">Family gallery</p>
+    <h1 class="serif" id="loginTitle">Your photos</h1>
+    <p>Enter the password you were given to see the photos.</p>
+    <input type="text" name="username" value="family" autocomplete="username" hidden>
+    <input type="password" id="pw" autocomplete="current-password" placeholder="Password" required>
+    <label class="remember"><input type="checkbox" id="remember" checked> Keep me signed in on this phone</label>
+    <button class="btn primary block" id="loginBtn" type="submit">See the photos</button>
+    <p class="err" id="loginErr" role="alert"></p>
+  </form>
+</section>
+
+<!-- ============ MAIN ============ -->
+<div id="mainView" hidden>
+  <header class="hero" id="hero">
+    <div class="row">
+      <div class="grow">
+        <p class="kicker">Family gallery</p>
+        <h1 class="serif" id="title"></h1>
+        <p class="date" id="date"></p>
+      </div>
+      <button class="icon-btn" id="refreshBtn" type="button" aria-label="Refresh">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
+      </button>
+      <button class="icon-btn" id="logoutBtn" type="button" aria-label="Sign out">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l-5-5 5-5M5 12h11"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <p class="as-admin" id="asAdmin" hidden>You're viewing as the organiser. Hearts and approvals you make here count as the family's.</p>
+    <div class="card intro" id="intro"></div>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab on" type="button" data-tab="all">All photos <span class="count" id="cAll"></span></button>
+      <button class="tab" type="button" data-tab="picks">♥ Your picks <span class="count" id="cPicks"></span></button>
+      <button class="tab" type="button" data-tab="edits">To approve <span class="dot" id="cEdits" hidden></span></button>
+    </nav>
+
+    <div class="grid" id="grid"></div>
+    <div class="edits" id="edits" hidden></div>
+    <div class="empty" id="empty" hidden></div>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lb" id="lb" hidden>
+  <div class="lb-top">
+    <div class="meta"><b id="lbWho"></b><span id="lbWhen"></span></div>
+    <button class="lb-close" id="lbClose" type="button" aria-label="Close">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <div class="lb-stage" id="lbStage">
+    <img id="lbImg" alt="">
+    <div class="lb-shield"></div>
+    <button class="lb-nav prev" id="lbPrev" type="button" aria-label="Previous"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <button class="lb-nav next" id="lbNext" type="button" aria-label="Next"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+  </div>
+  <div class="lb-bottom">
+    <button class="pick-btn" id="lbPick" type="button">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.5s-7.5-4.4-9.3-9.2C1.5 8 3.6 4.5 7.1 4.5c2 0 3.6 1.1 4.9 2.9 1.3-1.8 2.9-2.9 4.9-2.9 3.5 0 5.6 3.5 4.4 6.8-1.8 4.8-9.3 9.2-9.3 9.2z"/></svg>
+      <span id="lbPickText">Pick this one</span>
+    </button>
+    <div class="note-box" id="noteBox" hidden>
+      <textarea id="lbNote" maxlength="300" placeholder="Anything to change? e.g. crop, brighten, remove something…"></textarea>
+      <button class="btn" id="lbNoteSave" type="button">Save note</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="dialog-back" id="dialog" hidden>
+  <div class="dialog" role="dialog" aria-modal="true">
+    <h3 id="dlgTitle">What would you like changed?</h3>
+    <p id="dlgText">Tell us what to adjust and we'll send a new version.</p>
+    <textarea id="dlgNote" maxlength="400" placeholder="e.g. a little brighter, crop tighter, remove the bin on the left"></textarea>
+    <div class="row">
+      <button class="btn" id="dlgNo" type="button">Cancel</button>
+      <button class="btn primary" id="dlgYes" type="button">Send</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ======================================================
+   SETTINGS
+   ====================================================== */
+const CONFIG = {
+  supabaseUrl: "https://uqwlmegbelyqtbegxqlz.supabase.co",
+  anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxd2xtZWdiZWx5cXRiZWd4cWx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE3NTYzNzAsImV4cCI6MjEwNzMzMjM3MH0.bSeF8_kwKqSrEj3n8Ku2OeSU8E5nMqJj0hcfgXb8cW0",
+  functionName: "photo-admin",
+  photographer: "James",          // shown in the instructions
+  refreshSeconds: 60               // new guest photos appear automatically
+};
+
+/* ====================================================== */
+const $ = (id) => document.getElementById(id);
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} }
+};
+
+let gpass = "";
+let role = "host";
+let photos = [];
+let edits = [];
+let tab = "all";
+let lbList = [];
+let lbIndex = -1;
+const urlCache = {}; // keep image links stable between refreshes so nothing re-downloads
+
+async function api(action, extra = {}) {
+  const res = await fetch(`${CONFIG.supabaseUrl}/functions/v1/${CONFIG.functionName}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: CONFIG.anonKey, Authorization: `Bearer ${CONFIG.anonKey}` },
+    body: JSON.stringify({ gpass, action, ...extra })
+  });
+  let data = {};
+  try { data = await res.json(); } catch (e) {}
+  if (!res.ok) { const err = new Error(data.error || res.status); err.code = data.error; err.retry = data.retryInSeconds; throw err; }
+  return data;
+}
+function explain(err) {
+  switch (err.code) {
+    case "wrong_password": return "That password isn't right.";
+    case "gallery_closed": return "The gallery isn't open yet. Please check back soon.";
+    case "locked": return `Too many tries. Please wait ${Math.ceil((err.retry || 300) / 60)} minutes.`;
+    default: return navigator.onLine ? "Something went wrong. Please try again." : "You're offline.";
+  }
+}
+
+/* ---------- Look ---------- */
+function applySettings(s) {
+  if (!s) return;
+  document.documentElement.dataset.theme = ["blush", "sky", "ivory", "christmas"].includes(s.theme) ? s.theme : "blush";
+  $("title").textContent = s.title || "Your photos";
+  $("loginTitle").textContent = s.title || "Your photos";
+  $("date").textContent = s.date || "";
+  document.title = `${s.title || "Family"} · Gallery`;
+  for (const el of [$("hero"), $("loginView")]) {
+    el.style.backgroundImage = s.coverUrl ? `url("${s.coverUrl}")` : "";
+  }
+  store.set("gallery.look", JSON.stringify({ title: s.title, date: s.date, theme: s.theme }));
+}
+try { const look = JSON.parse(store.get("gallery.look") || "null"); if (look) applySettings(look); } catch (e) {}
+
+$("intro").innerHTML = `Here are all the photos guests have shared, live as they come in. Tap <b>♥</b> on the ones you love and add a note if you'd like anything changed. ${escapeHtml(CONFIG.photographer)} will polish your picks and post them under <b>To approve</b> so you can say yes before anything is printed.`;
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+
+/* ---------- Login ---------- */
+$("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  gpass = $("pw").value;
+  $("loginBtn").disabled = true; $("loginBtn").textContent = "Opening…"; $("loginErr").textContent = "";
+  try {
+    const d = await api("gCheck");
+    if ($("remember").checked) store.set("gallery.pw", gpass); else store.del("gallery.pw");
+    applySettings(d.settings);
+    showMain();
+  } catch (err) {
+    $("loginErr").textContent = explain(err);
+  } finally {
+    $("loginBtn").disabled = false; $("loginBtn").textContent = "See the photos";
+  }
+});
+$("logoutBtn").onclick = () => { store.del("gallery.pw"); location.reload(); };
+function showLogin(msg) {
+  $("mainView").hidden = true; $("loginView").hidden = false;
+  if (msg) $("loginErr").textContent = msg;
+}
+function showMain() {
+  $("loginView").hidden = true; $("mainView").hidden = false;
+  load();
+}
+
+/* ---------- Data ---------- */
+let loading = false;
+async function load() {
+  if (loading) return;
+  loading = true;
+  $("refreshBtn").classList.add("spin");
+  try {
+    const d = await api("gList");
+    role = d.role;
+    $("asAdmin").hidden = role !== "admin";
+    applySettings(d.settings);
+    for (const p of d.photos) {
+      urlCache[p.name] = urlCache[p.name] || { preview: p.previewUrl, view: p.viewUrl };
+      if (!urlCache[p.name].view && p.viewUrl) urlCache[p.name].view = p.viewUrl;
+    }
+    for (const e of d.edits) urlCache[e.path] = urlCache[e.path] || { preview: e.previewUrl, view: e.viewUrl };
+    photos = d.photos.slice().reverse(); // newest first
+    edits = d.edits;
+    render();
+  } catch (err) {
+    if (err.code === "wrong_password" || err.code === "gallery_closed") { store.del("gallery.pw"); showLogin(explain(err)); }
+    else toast(explain(err));
+  } finally {
+    loading = false;
+    $("refreshBtn").classList.remove("spin");
+  }
+}
+$("refreshBtn").onclick = load;
+setInterval(() => { if (gpass && document.visibilityState === "visible" && $("lb").hidden && $("dialog").hidden) load(); }, CONFIG.refreshSeconds * 1000);
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && gpass && $("lb").hidden) load(); });
+
+/* ---------- Render ---------- */
+const HEART = `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.5s-7.5-4.4-9.3-9.2C1.5 8 3.6 4.5 7.1 4.5c2 0 3.6 1.1 4.9 2.9 1.3-1.8 2.9-2.9 4.9-2.9 3.5 0 5.6 3.5 4.4 6.8-1.8 4.8-9.3 9.2-9.3 9.2z"/></svg>`;
+function niceGuest(slug) {
+  if (!slug || slug === "guest") return "A guest";
+  return slug.split("-").filter(Boolean).map((w) => w[0].toUpperCase() + w.slice(1)).join(" ");
+}
+function niceTime(iso) {
+  return iso ? new Date(iso).toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "";
+}
+
+function render() {
+  const picks = photos.filter((p) => p.pick);
+  const waiting = edits.filter((e) => e.status === "waiting").length;
+  $("cAll").textContent = photos.length;
+  $("cPicks").textContent = picks.length;
+  $("cEdits").textContent = waiting;
+  $("cEdits").hidden = !waiting;
+  document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("on", t.dataset.tab === tab));
+
+  const grid = $("grid"), editsBox = $("edits"), empty = $("empty");
+  grid.hidden = tab === "edits"; editsBox.hidden = tab !== "edits";
+  empty.hidden = true;
+
+  if (tab === "edits") return renderEdits();
+
+  const list = tab === "picks" ? picks : photos;
+  grid.innerHTML = "";
+  if (!list.length) {
+    empty.hidden = false;
+    empty.innerHTML = tab === "picks"
+      ? `<span class="serif">No picks yet</span>Open any photo and tap ♥ to choose it.`
+      : `<span class="serif">No photos yet</span>As guests share photos they'll appear here.`;
+    return;
+  }
+  const frag = document.createDocumentFragment();
+  list.forEach((p, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "tile" + (p.pick ? " picked" : "") + (p.pick && p.pick.note ? " has-note" : "");
+    b.setAttribute("aria-label", `Photo from ${niceGuest(p.guest)}`);
+    const img = document.createElement("img");
+    img.loading = "lazy"; img.decoding = "async"; img.alt = ""; img.draggable = false;
+    img.onload = () => img.classList.add("ready");
+    img.src = (urlCache[p.name] && urlCache[p.name].preview) || "";
+    b.appendChild(img);
+    b.insertAdjacentHTML("beforeend", `<span class="heart">${HEART}</span><span class="note-dot">Note</span>`);
+    b.onclick = () => openLb(list, i);
+    frag.appendChild(b);
+  });
+  grid.appendChild(frag);
+}
+
+function renderEdits() {
+  const box = $("edits");
+  box.innerHTML = "";
+  if (!edits.length) {
+    $("empty").hidden = false;
+    $("empty").innerHTML = `<span class="serif">Nothing to approve yet</span>When ${escapeHtml(CONFIG.photographer)} has polished your picks, they'll appear here for you to approve.`;
+    return;
+  }
+  const order = { waiting: 0, changes: 1, approved: 2 };
+  edits.slice().sort((a, b) => (order[a.status] - order[b.status]) || String(b.created_at).localeCompare(String(a.created_at))).forEach((e) => {
+    const orig = e.original ? photos.find((p) => p.name === e.original) : null;
+    const card = document.createElement("div");
+    card.className = "card edit";
+    const statusChip = { waiting: `<span class="chip waiting">Waiting for you</span>`, approved: `<span class="chip approved">✓ Approved</span>`, changes: `<span class="chip changes">Changes asked for</span>` }[e.status] || "";
+    card.innerHTML = `
+      <div class="pic"><img alt="" draggable="false"><span class="label">Edited</span>
+        ${orig ? `<div class="seg"><button type="button" class="on" data-v="after">After</button><button type="button" data-v="before">Before</button></div>` : ""}
+      </div>
+      <div class="body">
+        ${statusChip}
+        ${e.note ? `<p class="note">Your note: ${escapeHtml(e.note)}</p>` : ""}
+        <div class="actions">
+          <button class="btn primary" data-act="approve" type="button">${e.status === "approved" ? "Approved ✓" : "Approve"}</button>
+          <button class="btn" data-act="changes" type="button">Ask for changes</button>
+        </div>
+      </div>`;
+    const img = card.querySelector("img");
+    const after = (urlCache[e.path] && (urlCache[e.path].view || urlCache[e.path].preview)) || "";
+    const before = orig ? ((urlCache[orig.name] && (urlCache[orig.name].view || urlCache[orig.name].preview)) || "") : "";
+    img.src = after;
+    card.querySelectorAll(".seg button").forEach((b) => b.onclick = () => {
+      card.querySelectorAll(".seg button").forEach((x) => x.classList.toggle("on", x === b));
+      img.src = b.dataset.v === "before" ? before : after;
+      card.querySelector(".label").textContent = b.dataset.v === "before" ? "Original" : "Edited";
+    });
+    card.querySelector('[data-act="approve"]').onclick = () => decide(e, "approved", "");
+    card.querySelector('[data-act="changes"]').onclick = async () => {
+      const note = await askNote(e.note);
+      if (note !== null) decide(e, "changes", note);
+    };
+    box.appendChild(card);
+  });
+}
+
+async function decide(e, status, note) {
+  try {
+    await api("gDecide", { path: e.path, status, note });
+    e.status = status; e.note = note;
+    toast(status === "approved" ? "Approved, thank you!" : "Sent. We'll make those changes.");
+    render();
+  } catch (err) { toast(explain(err)); }
+}
+
+document.querySelectorAll(".tab").forEach((t) => t.onclick = () => { tab = t.dataset.tab; render(); window.scrollTo({ top: Math.min(window.scrollY, $("hero").offsetHeight), behavior: "smooth" }); });
+
+/* ---------- Lightbox ---------- */
+function openLb(list, i) {
+  lbList = list.slice(); lbIndex = i;
+  $("lb").hidden = false; document.body.style.overflow = "hidden";
+  showLb();
+}
+function closeLb() { $("lb").hidden = true; document.body.style.overflow = ""; render(); }
+function showLb() {
+  const p = lbList[lbIndex];
+  if (!p) return closeLb();
+  $("lbWho").textContent = niceGuest(p.guest);
+  $("lbWhen").textContent = `${niceTime(p.created_at)} · ${lbIndex + 1} of ${lbList.length}`;
+  const img = $("lbImg");
+  const u = urlCache[p.name] || {};
+  img.style.opacity = ".4";
+  img.src = u.preview || "";
+  if (u.view && u.view !== u.preview) {
+    const pre = new Image();
+    pre.onload = () => { if (lbList[lbIndex] === p) { img.src = u.view; img.style.opacity = "1"; } };
+    pre.src = u.view;
+  } else img.style.opacity = "1";
+  [lbList[lbIndex + 1], lbList[lbIndex - 1]].forEach((n) => { if (n && urlCache[n.name] && urlCache[n.name].view) { const x = new Image(); x.src = urlCache[n.name].view; } });
+  updatePickUi(p);
+}
+function updatePickUi(p) {
+  $("lbPick").classList.toggle("on", !!p.pick);
+  $("lbPickText").textContent = p.pick ? "Picked ♥" : "Pick this one";
+  $("noteBox").hidden = !p.pick;
+  $("lbNote").value = (p.pick && p.pick.note) || "";
+}
+function step(d) { const n = lbIndex + d; if (n >= 0 && n < lbList.length) { lbIndex = n; showLb(); } }
+$("lbClose").onclick = closeLb;
+$("lbPrev").onclick = () => step(-1);
+$("lbNext").onclick = () => step(1);
+document.addEventListener("keydown", (e) => {
+  if ($("lb").hidden) return;
+  if (e.key === "Escape") closeLb();
+  if (e.key === "ArrowLeft") step(-1);
+  if (e.key === "ArrowRight") step(1);
+});
+(() => {
+  let x0 = null, y0 = null;
+  const st = $("lbStage");
+  st.addEventListener("touchstart", (e) => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+  st.addEventListener("touchend", (e) => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.3) step(dx < 0 ? 1 : -1);
+    else if (dy > 110 && Math.abs(dy) > Math.abs(dx) * 1.5) closeLb();
+    x0 = y0 = null;
+  });
+})();
+document.addEventListener("contextmenu", (e) => { if (e.target.closest(".lb, .tile, .edit .pic")) e.preventDefault(); });
+
+$("lbPick").onclick = async () => {
+  const p = lbList[lbIndex];
+  const on = !p.pick;
+  const prev = p.pick;
+  p.pick = on ? { note: "" } : null;
+  updatePickUi(p);
+  syncPhoto(p);
+  try {
+    const d = await api("gPick", { name: p.name, on, note: "" });
+    p.pick = d.pick; syncPhoto(p); updatePickUi(p);
+    if (on) toast("Added to your picks ♥");
+  } catch (err) { p.pick = prev; updatePickUi(p); syncPhoto(p); toast(explain(err)); }
+};
+$("lbNoteSave").onclick = async () => {
+  const p = lbList[lbIndex];
+  const note = $("lbNote").value.trim();
+  try {
+    const d = await api("gPick", { name: p.name, on: true, note });
+    p.pick = d.pick; syncPhoto(p);
+    toast(note ? "Note saved" : "Note cleared");
+    $("lbNote").blur();
+  } catch (err) { toast(explain(err)); }
+};
+function syncPhoto(p) { const m = photos.find((x) => x.name === p.name); if (m && m !== p) m.pick = p.pick; }
+
+/* ---------- Bits ---------- */
+let toastTimer;
+function toast(msg) {
+  const t = $("toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 3000);
+}
+function askNote(current) {
+  return new Promise((resolve) => {
+    $("dlgNote").value = current || "";
+    $("dialog").hidden = false;
+    setTimeout(() => $("dlgNote").focus(), 50);
+    const done = (v) => { $("dialog").hidden = true; resolve(v); };
+    $("dlgYes").onclick = () => done($("dlgNote").value.trim());
+    $("dlgNo").onclick = () => done(null);
+  });
+}
+
+/* ---------- Start ---------- */
+(() => {
+  const saved = store.get("gallery.pw");
+  if (saved) { gpass = saved; showMain(); } else showLogin();
+})();
+if ("serviceWorker" in navigator && window.isSecureContext) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
+</script>
+</body>
+</html>

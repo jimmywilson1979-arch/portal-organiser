@@ -1,0 +1,16 @@
+{
+  "id": "./",
+  "name": "Family Gallery",
+  "short_name": "Family Gallery",
+  "description": "See the photos from the day and pick your favourites.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fbf6f8",
+  "theme_color": "#1f2a4d",
+  "icons": [
+    { "src": "gallery-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "gallery-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "gallery-icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
