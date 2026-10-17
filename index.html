@@ -184,6 +184,29 @@
   .save-row .note { font-size: 13px; color: var(--muted); font-weight: 600; }
   .seg.small button { padding: 7px 11px; font-size: 13px; }
 
+  /* ---------- Family gallery + edits ---------- */
+  .tile .pickmark { position: absolute; bottom: 5px; right: 5px; width: 24px; height: 24px; border-radius: 50%; background: #fff; color: #e0457b; display: none; place-items: center; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
+  .tile.pick .pickmark { display: grid; }
+  .tile .notemark { position: absolute; bottom: 6px; left: 6px; padding: 2px 7px; border-radius: 9px; background: rgba(0,0,0,.55); color: #fff; font-size: 11px; font-weight: 800; display: none; }
+  .tile.has-note .notemark { display: block; }
+  .gcard, .ecard { margin-top: 14px; padding: 18px; }
+  .gcard h2, .ecard h2 { margin: 0 0 4px; font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+  .gcard .sub, .ecard .sub { margin: 0 0 12px; font-size: 13.5px; color: var(--muted); }
+  .pill { display: inline-flex; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 800; }
+  .pill.open { background: #e6f5ec; color: #2f8a5f; } .pill.closed { background: var(--pink-soft); color: var(--muted); }
+  .row-wrap { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .row-wrap input[type=text] { flex: 1; min-width: 160px; font: inherit; font-size: 16px; padding: 11px 13px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--pink-soft); color: var(--ink); outline: none; }
+  .link-box { margin-top: 12px; padding: 10px 12px; border-radius: 12px; background: var(--pink-soft); font-size: 13.5px; word-break: break-all; font-weight: 700; }
+  .backfill { margin-top: 12px; padding: 10px 12px; border-radius: 12px; background: #fff6e0; color: #6b4a00; font-size: 13.5px; font-weight: 700; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .backfill .btn { padding: 8px 12px; font-size: 13.5px; }
+  .egrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+  .etile { position: relative; border: 0; padding: 0; background: var(--pink-soft); border-radius: 10px; overflow: hidden; aspect-ratio: 1; }
+  .etile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .etile .st { position: absolute; left: 4px; right: 4px; bottom: 4px; padding: 3px 6px; border-radius: 7px; font-size: 11px; font-weight: 800; text-align: center; background: rgba(255,255,255,.92); }
+  .etile .st.waiting { color: #c9668c; } .etile .st.approved { color: #2f8a5f; } .etile .st.changes { color: #b7791f; }
+  .lb-note { margin: 0 12px; padding: 10px 12px; border-radius: 12px; background: rgba(224,69,123,.18); color: #ffd3e2; font-size: 14px; }
+  .lb-note b { color: #fff; }
+
   /* ---------- Lightbox ---------- */
   .lb { position: fixed; inset: 0; z-index: 50; background: #0d0f14; display: flex; flex-direction: column; color: #fff; }
   .lb-top, .lb-bottom { display: flex; align-items: center; gap: 8px; padding: 10px 12px; }
@@ -342,10 +365,42 @@
     </div>
   </section>
 
+  <section class="card gcard" id="galleryCard">
+    <h2>Family gallery <span class="pill closed" id="gStatus">Closed</span></h2>
+    <p class="sub">A private, view-only page for the hosts. They see guest photos live, ♥ their favourites with notes, and approve your edited versions. No downloads.</p>
+    <div class="row-wrap">
+      <input type="text" id="gPass" autocomplete="off" placeholder="Set a gallery password (not your own)">
+      <button class="btn primary" id="gSave" type="button">Save &amp; open</button>
+    </div>
+    <div class="row-wrap" style="margin-top:10px">
+      <button class="btn" id="gToggle" type="button" hidden>Close gallery</button>
+      <button class="btn" id="gCopy" type="button">Copy link</button>
+      <a class="btn" id="gOpen" target="_blank" rel="noopener">Open gallery</a>
+    </div>
+    <div class="link-box" id="gLink"></div>
+    <div class="backfill" id="backfill" hidden>
+      <span id="backfillText"></span>
+      <button class="btn" id="backfillBtn" type="button">Create now</button>
+    </div>
+  </section>
+
+  <section class="card ecard" id="editsCard">
+    <h2>Edited versions</h2>
+    <p class="sub" id="editsSub">Upload your polished versions for the family to approve. Open any photo and tap <b>Upload edit</b> to link it to the original, or add your own shots here.</p>
+    <input type="file" id="editFiles" accept="image/*" multiple hidden>
+    <div class="row-wrap">
+      <button class="btn primary" id="editUpload" type="button">Upload edited photos</button>
+      <button class="btn" id="editDlApproved" type="button" hidden>Download approved</button>
+    </div>
+    <div class="progress" id="editProgress" hidden><span id="editProgressText"></span><div class="meter"><i id="editProgressBar"></i></div></div>
+    <div class="egrid" id="egrid"></div>
+  </section>
+
   <div class="toolbar">
     <div class="seg" role="tablist">
       <button type="button" class="on" data-view="all">All</button>
       <button type="button" data-view="fav">★ Book</button>
+      <button type="button" data-view="picks">♥ Family <span id="picksCount"></span></button>
     </div>
     <div class="seg">
       <button type="button" class="on" data-sort="new">Newest</button>
@@ -384,7 +439,12 @@
     <button class="lb-nav prev" id="lbPrev" type="button" aria-label="Previous"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
     <button class="lb-nav next" id="lbNext" type="button" aria-label="Next"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
   </div>
+  <p class="lb-note" id="lbFamNote" hidden></p>
   <div class="lb-bottom">
+    <button class="lb-btn" id="lbEdit" type="button">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"/></svg>
+      Upload edit
+    </button>
     <button class="lb-btn" id="lbStar" type="button">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.6l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/></svg>
       <span id="lbStarText">Add to book</span>
@@ -422,6 +482,8 @@ const CONFIG = {
   anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxd2xtZWdiZWx5cXRiZWd4cWx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE3NTYzNzAsImV4cCI6MjEwNzMzMjM3MH0.bSeF8_kwKqSrEj3n8Ku2OeSU8E5nMqJj0hcfgXb8cW0",
   functionName: "photo-admin",
   guestUrl: "https://picture-portal.netlify.app/",
+  galleryUrl: "https://jimmywilson1979-arch.github.io/portal-gallery/",
+  bucket: "christening",
   zipPrefix: "olivia-christening",
   storageLimitMB: 1024,       // Supabase free plan
   zipBatchMB: 180             // split big downloads into zips of about this size
@@ -515,6 +577,7 @@ function showMain() {
   $("mainView").hidden = false;
   load();
   loadSettings();
+  loadGallery();
 }
 
 /* ---------- Load ---------- */
@@ -523,12 +586,15 @@ async function load() {
   try {
     const data = await api("list");
     items = data.items || [];
+    edits = data.edits || [];
     for (const it of items) {
       if (!previewCache[it.name] && it.previewUrl) previewCache[it.name] = it.previewUrl;
     }
     const names = new Set(items.map((i) => i.name));
     for (const n of [...selected]) if (!names.has(n)) selected.delete(n);
     renderStats(data.totalBytes || 0);
+    renderEdits();
+    renderGalleryCard();
     renderChips();
     renderGrid();
   } catch (err) {
@@ -566,6 +632,7 @@ function fileNameOf(name) { return name.split("/").pop(); }
 function visibleItems() {
   let list = items.slice();
   if (view === "fav") list = list.filter((i) => i.fav);
+  if (view === "picks") list = list.filter((i) => i.pick);
   if (guestFilter) list = list.filter((i) => i.guest === guestFilter);
   list.sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)));
   if (sort === "new") list.reverse();
@@ -589,6 +656,8 @@ function renderStats(totalBytes) {
   const favCount = items.filter((i) => i.fav).length;
   $("dlAllText").textContent = `All photos (${items.length})`;
   $("dlFavsText").textContent = `Book favourites (${favCount})`;
+  const pickCount = items.filter((i) => i.pick).length;
+  $("picksCount").textContent = pickCount ? `(${pickCount})` : "";
   $("dlAll").disabled = !items.length || busyDownload;
   $("dlFavs").disabled = !favCount || busyDownload;
 }
@@ -635,7 +704,7 @@ function renderGrid() {
   list.forEach((it) => {
     const b = document.createElement("button");
     b.type = "button";
-    b.className = "tile" + (it.fav ? " fav" : "") + (selected.has(it.name) ? " sel" : "");
+    b.className = "tile" + (it.fav ? " fav" : "") + (it.pick ? " pick" : "") + (it.pick && it.pick.note ? " has-note" : "") + (selected.has(it.name) ? " sel" : "");
     b.dataset.name = it.name;
     b.setAttribute("aria-label", `Photo from ${niceGuest(it.guest)}`);
     const img = document.createElement("img");
@@ -645,7 +714,7 @@ function renderGrid() {
     img.onload = () => img.classList.add("ready");
     img.src = previewCache[it.name] || "";
     b.appendChild(img);
-    b.insertAdjacentHTML("beforeend", `<span class="star">${STAR_SVG}</span><span class="check">${CHECK_SVG}</span>`);
+    b.insertAdjacentHTML("beforeend", `<span class="star">${STAR_SVG}</span><span class="pickmark">${HEART_SVG}</span><span class="notemark">Note</span><span class="check">${CHECK_SVG}</span>`);
     b.onclick = () => {
       if (selecting) toggleSelect(it.name, b);
       else openLightbox(list.indexOf(it));
@@ -755,6 +824,9 @@ async function showLb() {
   const it = lbList[lbIndex];
   if (!it) return closeLightbox();
   $("lbWho").textContent = niceGuest(it.guest);
+  const famNote = $("lbFamNote");
+  famNote.hidden = !it.pick;
+  if (it.pick) famNote.innerHTML = it.pick.note ? `<b>♥ The family picked this.</b> Their note: ${escapeHtml(it.pick.note)}` : "<b>♥ The family picked this.</b>";
   $("lbWhen").textContent = `${niceTime(it.created_at)} · ${fmtSize(it.size)} · ${lbIndex + 1} of ${lbList.length}`;
   $("lbStar").classList.toggle("on", it.fav);
   $("lbStarText").textContent = it.fav ? "In the book" : "Add to book";
@@ -1100,6 +1172,170 @@ $("coverRemove").onclick = async () => {
     renderSettingsUI();
     toast("Cover photo removed");
   } catch (err) { toast(explain(err)); }
+};
+
+/* ---------- Family gallery ---------- */
+let edits = [];
+let gallery = { enabled: false, hasPassword: false };
+const HEART_SVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.5s-7.5-4.4-9.3-9.2C1.5 8 3.6 4.5 7.1 4.5c2 0 3.6 1.1 4.9 2.9 1.3-1.8 2.9-2.9 4.9-2.9 3.5 0 5.6 3.5 4.4 6.8-1.8 4.8-9.3 9.2-9.3 9.2z"/></svg>`;
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+
+$("gLink").textContent = CONFIG.galleryUrl.replace(/^https?:\/\//, "");
+$("gOpen").href = CONFIG.galleryUrl;
+$("gCopy").onclick = async () => {
+  try { await navigator.clipboard.writeText(CONFIG.galleryUrl); toast("Gallery link copied"); } catch (e) { toast(CONFIG.galleryUrl); }
+};
+
+async function loadGallery() {
+  try { gallery = await api("getGallery"); } catch (e) {}
+  renderGalleryCard();
+}
+function renderGalleryCard() {
+  const st = $("gStatus");
+  st.textContent = gallery.enabled ? "Open" : "Closed";
+  st.className = "pill " + (gallery.enabled ? "open" : "closed");
+  $("gToggle").hidden = !gallery.hasPassword;
+  $("gToggle").textContent = gallery.enabled ? "Close gallery" : "Reopen gallery";
+  $("gSave").textContent = gallery.hasPassword ? "Change password" : "Save & open";
+  $("gPass").placeholder = gallery.hasPassword ? "New gallery password" : "Set a gallery password (not your own)";
+  const missing = items.filter((i) => !i.hasDisplay).length;
+  $("backfill").hidden = !missing || backfillBusy;
+  $("backfillText").textContent = `${missing} photo${missing === 1 ? "" : "s"} need a gallery-size copy (photos from before this update).`;
+}
+$("gSave").onclick = async () => {
+  const pw = $("gPass").value.trim();
+  if (pw.length < 4) return toast("Use at least 4 characters");
+  try {
+    const d = await api("setGallery", { newPassword: pw, enabled: true });
+    gallery = d; $("gPass").value = "";
+    renderGalleryCard();
+    toast("Gallery is open. Send the hosts the link and password.");
+  } catch (err) {
+    toast(err.code === "same_as_admin" ? "Pick a different password from your organiser one" : explain(err));
+  }
+};
+$("gToggle").onclick = async () => {
+  try { gallery = await api("setGallery", { enabled: !gallery.enabled }); renderGalleryCard(); toast(gallery.enabled ? "Gallery reopened" : "Gallery closed"); }
+  catch (err) { toast(explain(err)); }
+};
+
+/* Gallery-size copies for photos uploaded before this feature (made on this phone). */
+let backfillBusy = false;
+async function makeJpeg(blob, maxEdge, q) {
+  let src, w, h, url = null;
+  try { src = await createImageBitmap(blob, { imageOrientation: "from-image" }); w = src.width; h = src.height; }
+  catch (e) {
+    url = URL.createObjectURL(blob);
+    src = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+    w = src.naturalWidth; h = src.naturalHeight;
+  }
+  const s = Math.min(1, maxEdge / Math.max(w, h));
+  const c = document.createElement("canvas");
+  c.width = Math.max(1, Math.round(w * s)); c.height = Math.max(1, Math.round(h * s));
+  c.getContext("2d").drawImage(src, 0, 0, c.width, c.height);
+  if (src.close) src.close();
+  if (url) URL.revokeObjectURL(url);
+  return await new Promise((res) => c.toBlob(res, "image/jpeg", q));
+}
+async function storagePost(path, blob) {
+  const r = await fetch(`${CONFIG.supabaseUrl}/storage/v1/object/${CONFIG.bucket}/${path.split("/").map(encodeURIComponent).join("/")}`, {
+    method: "POST",
+    headers: { apikey: CONFIG.anonKey, Authorization: `Bearer ${CONFIG.anonKey}`, "Content-Type": "image/jpeg", "x-upsert": "false" },
+    body: blob
+  });
+  if (!r.ok && r.status !== 409) { const t = await r.text().catch(() => ""); if (!/duplicate|exists/i.test(t)) throw new Error(`copy ${r.status}`); }
+}
+$("backfillBtn").onclick = async () => {
+  const todo = items.filter((i) => !i.hasDisplay);
+  if (!todo.length) return;
+  backfillBusy = true;
+  $("backfillBtn").disabled = true;
+  let done = 0, failed = 0;
+  try {
+    const { urls } = await api("urls", { names: todo.map((i) => i.name), download: false });
+    for (const it of todo) {
+      $("backfillText").textContent = `Making gallery copies… ${done + failed + 1} of ${todo.length}`;
+      try {
+        const blob = await (await fetch(urls[it.name])).blob();
+        const base = fileNameOf(it.name).replace(/\.[^.]+$/, "");
+        await storagePost(`uploads/_display/${base}.jpg`, await makeJpeg(blob, 1600, 0.82));
+        if (!it.previewUrl || /\/uploads\/[^/_][^/]*$/.test((it.previewUrl.split("?")[0]))) {
+          await storagePost(`uploads/_thumbs/${base}.jpg`, await makeJpeg(blob, 640, 0.72));
+        }
+        it.hasDisplay = true; done++;
+      } catch (e) { failed++; }
+    }
+    toast(failed ? `${done} done, ${failed} couldn't be read (unusual format)` : `All ${done} gallery copies made`);
+  } catch (err) { toast(explain(err)); }
+  finally { backfillBusy = false; $("backfillBtn").disabled = false; renderGalleryCard(); }
+};
+
+/* ---------- Edited versions ---------- */
+let editTarget = null; // original photo name when uploading from the lightbox
+$("editUpload").onclick = () => { editTarget = null; $("editFiles").click(); };
+$("lbEdit").onclick = () => { editTarget = lbList[lbIndex] ? lbList[lbIndex].name : null; $("editFiles").click(); };
+$("editFiles").addEventListener("change", async () => {
+  const files = Array.from($("editFiles").files || []);
+  $("editFiles").value = "";
+  if (!files.length) return;
+  const original = editTarget;
+  if (!$("lb").hidden) closeLightbox();
+  document.getElementById("editsCard").scrollIntoView({ behavior: "smooth", block: "start" });
+  const prog = $("editProgress"), text = $("editProgressText"), bar = $("editProgressBar");
+  prog.hidden = false; bar.style.width = "0%";
+  let ok = 0;
+  try {
+    const exts = files.map((f) => ((/\.([a-z0-9]+)$/i.exec(f.name) || [])[1] || "jpg").toLowerCase());
+    const { uploads } = await api("editUploadUrls", { count: files.length, original, exts });
+    for (let i = 0; i < files.length; i++) {
+      const f = files[i], u = uploads[i];
+      text.textContent = `Uploading edit ${i + 1} of ${files.length}…`;
+      try {
+        const [display, thumb] = [await makeJpeg(f, 1600, 0.85), await makeJpeg(f, 640, 0.75)];
+        const put = (url, body, type) => fetch(url, { method: "PUT", headers: { "Content-Type": type, apikey: CONFIG.anonKey, "x-upsert": "true" }, body })
+          .then((r) => { if (!r.ok) throw new Error(`upload ${r.status}`); });
+        await put(u.urls.full, f, f.type || "image/jpeg");
+        await put(u.urls.display, display, "image/jpeg");
+        await put(u.urls.thumb, thumb, "image/jpeg");
+        await api("registerEdit", { path: u.paths.full, original });
+        ok++;
+      } catch (e) { console.error(e); }
+      bar.style.width = `${Math.round(((i + 1) / files.length) * 100)}%`;
+    }
+    text.textContent = ok === files.length ? `${ok} edit${ok === 1 ? "" : "s"} sent to the family for approval` : `${ok} of ${files.length} uploaded. Try the others again.`;
+    load();
+  } catch (err) { text.textContent = explain(err); }
+  setTimeout(() => (prog.hidden = true), 6000);
+});
+
+function renderEdits() {
+  const box = $("egrid");
+  box.innerHTML = "";
+  const counts = { waiting: 0, approved: 0, changes: 0 };
+  edits.forEach((e) => (counts[e.status] = (counts[e.status] || 0) + 1));
+  $("editDlApproved").hidden = !counts.approved;
+  $("editDlApproved").textContent = `Download approved (${counts.approved})`;
+  if (edits.length) $("editsSub").innerHTML = `${counts.waiting} waiting · ${counts.approved} approved · ${counts.changes} with changes asked for. Tap one for details.`;
+  const label = { waiting: "Waiting", approved: "✓ Approved", changes: "Changes" };
+  edits.forEach((e) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "etile";
+    b.innerHTML = `<img alt="" loading="lazy" src="${e.previewUrl || ""}"><span class="st ${e.status}">${label[e.status] || e.status}</span>`;
+    b.onclick = () => editDetails(e);
+    box.appendChild(b);
+  });
+}
+async function editDetails(e) {
+  const orig = e.original ? items.find((i) => i.name === e.original) : null;
+  const statusText = { waiting: "Waiting for the family to approve.", approved: "Approved by the family.", changes: "The family asked for changes." }[e.status] || "";
+  const note = e.note ? ` Their note: "${e.note}"` : "";
+  const ok = await confirmDialog("Edited photo", `${statusText}${note}${orig ? ` (Edit of a photo by ${niceGuest(orig.guest)}.)` : ""}`, "Delete edit");
+  if (!ok) return;
+  try { await api("deleteEdit", { path: e.path }); toast("Edit deleted"); load(); } catch (err) { toast(explain(err)); }
+}
+$("editDlApproved").onclick = () => {
+  const list = edits.filter((e) => e.status === "approved").map((e) => ({ name: e.path, size: e.size || 0, created_at: e.created_at }));
+  downloadZip(list, "approved-edits");
 };
 
 /* ---------- Toast & confirm ---------- */
