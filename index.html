@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Christening Photos · Organiser</title>
+<title>Picture Portal · Organiser</title>
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#fbf6f8">
 <link rel="manifest" href="manifest.webmanifest">
@@ -243,7 +243,7 @@
   <form class="card" id="loginForm" autocomplete="on">
     <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#c9668c" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
     <h1>Organiser</h1>
-    <p>Olivia's christening photos</p>
+    <p id="loginSub">Picture Portal photos</p>
     <input type="text" name="username" value="organiser" autocomplete="username" hidden>
     <input type="password" id="pw" autocomplete="current-password" placeholder="Password" required>
     <label class="remember"><input type="checkbox" id="remember" checked> Keep me signed in on this phone</label>
@@ -255,7 +255,7 @@
 <!-- ============ MAIN ============ -->
 <div class="wrap" id="mainView" hidden>
   <header class="top">
-    <h1><span class="sub">Organiser</span><span id="adminTitle">Olivia's Christening</span></h1>
+    <h1><span class="sub">Organiser</span><span id="adminTitle"></span></h1>
     <button class="icon-btn" id="refreshBtn" type="button" aria-label="Refresh">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
     </button>
@@ -342,7 +342,7 @@
 
       <div class="field">
         <label for="setTitle">Title</label>
-        <input type="text" id="setTitle" maxlength="70" placeholder="Olivia's Christening">
+        <input type="text" id="setTitle" maxlength="70" placeholder="e.g. Kelly &amp; James">
       </div>
       <div class="field">
         <label for="setDate">Date line</label>
@@ -484,7 +484,7 @@ const CONFIG = {
   guestUrl: "https://picture-portal.netlify.app/",
   galleryUrl: "https://jimmywilson1979-arch.github.io/portal-organiser/gallery/",
   bucket: "christening",
-  zipPrefix: "olivia-christening",
+  zipPrefix: "photos",
   storageLimitMB: 1024,       // Supabase free plan
   zipBatchMB: 180             // split big downloads into zips of about this size
 };
@@ -1049,9 +1049,19 @@ async function loadSettings() {
   } catch (err) { /* list() already reports problems */ }
 }
 
+function showEventTitle(title) {
+  // The heading, tab name and sign-in line all follow the event title from Page settings,
+  // and remember it so the right name shows straight away next time.
+  const t = (title || "").trim();
+  $("adminTitle").textContent = t || "Photos";
+  $("loginSub").textContent = t ? `${t} · photos` : "Picture Portal photos";
+  document.title = t ? `${t} · Organiser` : "Picture Portal · Organiser";
+  if (t) store.set("org.eventTitle", t);
+}
+
 function fillSettings(s) {
   draft = { ...s };
-  $("adminTitle").textContent = s.title || "Photos";
+  showEventTitle(s.title);
   $("setTitle").value = s.title || "";
   $("setDate").value = s.date || "";
   $("setMessage").value = s.message || "";
@@ -1361,6 +1371,7 @@ function confirmDialog(title, text, yesLabel = "Delete") {
 
 /* ---------- Start ---------- */
 (async () => {
+  showEventTitle(store.get("org.eventTitle") || "");
   const saved = store.get("org.pw");
   if (saved) {
     password = saved;
